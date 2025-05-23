@@ -1,0 +1,6 @@
+@REM Using Azure Resource Graph Explorer
+
+resources
+| where type == 'microsoft.storage/storageaccounts'
+| where isnull(properties.privateEndpointConnections)
+| project name, resourceGroup, location, sku=sku.name
