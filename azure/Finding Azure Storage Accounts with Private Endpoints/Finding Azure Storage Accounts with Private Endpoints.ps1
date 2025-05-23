@@ -21,3 +21,6 @@ foreach ($sa in $storageAccounts) {
 
 # Export to CSV
 $report | Export-Csv -Path "StorageAccountsWithPrivateEndpoints.csv" -NoTypeInformation
+
+# Download the file (if needed)
+Write-Host "Download the report from: https://shell.azure.com/powershell#blade/Microsoft_Azure_Storage/ContainerMenuBlade/container/cloudshell/path/PrivateEndpointStorageReport.csv"

@@ -13,21 +13,33 @@ To generate a report of Azure Storage Accounts that have private endpoints confi
 ---
 
 ## Option 2: Using Azure PowerShell
-- Use Azure PowerShell cmdlets to query storage accounts and their private endpoints (details to be added)
+- Use Azure PowerShell cmdlets to query storage accounts and their private endpoints 
 
 ---
 
-## Option 3: Using Azure CLI
-- Use Azure CLI commands to list storage accounts with private endpoint connections
+## Option 3: Using Azure PowerShell in Cloud Shell
+- Open Azure Cloud Shell (https://shell.azure.com)
+- Choose PowerShell as the environment.
+- Run the scripts with .ps1 extensions to list storage accounts with private endpoints and export to CSV.
+   ## How to Access the Report in Cloud Shell
+    - The report is saved in your Cloud Shell's attached storage (clouddrive).
+    - To download it:
+        - Click the "Upload/Download" button in Cloud Shell.
+        - Select Download and choose the generated file (PrivateEndpointStorageReport.csv or storage_private_endpoints.json).
 
 ---
 
-## Option 4: Using Azure Resource Graph Explorer
-- Use Kusto Query Language (KQL) queries in Azure Resource Graph Explorer to find storage accounts with private endpoints
+## Option 4: Using Azure CLI
+- Use Azure CLI commands to list storage accounts with private endpoint connections. You can use the commands listed in the .cmd files.
 
 ---
 
-## Additional Option: Azure Storage REST API
+## Option 5: Using Azure Resource Graph Explorer
+- Use Kusto Query Language (KQL) queries in Azure Resource Graph Explorer to find storage accounts with private endpoints. Those are listed in .kql files. Also, you can use KQL queries with Azure CLI, this is listed in one of the .cmd file.
+
+---
+
+## Option 6: Azure Storage REST API
 - You can also use the Azure Storage REST API to programmatically get private endpoint connections information
 
 ---

@@ -1,0 +1,7 @@
+//Run this Kusto query in Azure Resource Graph Explorer:
+
+resources
+| where type == 'microsoft.network/privateendpoints'
+| where properties.privateLinkServiceConnections[0].properties.privateLinkServiceId contains "Microsoft.Storage/storageAccounts"
+| extend storageAccountName = tostring(split(properties.privateLinkServiceConnections[0].properties.privateLinkServiceId,'/')[-1])
+| project privateEndpointName=name, resourceGroup, storageAccountName, connectionState=properties.privateLinkServiceConnections[0].properties.privateLinkServiceConnectionState.status
