@@ -1,0 +1,7 @@
+//Using Azure Resource Graph Explorer
+
+resources
+| where type == 'microsoft.storage/storageaccounts'
+| where isnotempty(properties.privateEndpointConnections)
+| project name, resourceGroup, location, privateEndpointCount=array_length(properties.privateEndpointConnections)
+| sort by privateEndpointCount desc
