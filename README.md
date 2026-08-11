@@ -5,6 +5,7 @@
 [![PowerShell](https://img.shields.io/badge/Language-PowerShell-5391FE.svg)](https://learn.microsoft.com/en-us/powershell/)
 [![Bash](https://img.shields.io/badge/Language-Bash-4EAA25.svg)](https://www.gnu.org/software/bash/)
 [![KQL](https://img.shields.io/badge/Language-KQL-0078D4.svg)](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/query/)
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa.svg)](https://github.com/sponsors/git-ranjan)
 [![CI/CD](https://github.com/git-ranjan/multi-cloud-automation-scripts/actions/workflows/lint-and-validate.yml/badge.svg)](.github/workflows/lint-and-validate.yml)
 
 An enterprise-grade collection of multi-cloud operational, security governance, and compliance automation scripts. Designed for Cloud Engineers, DevOps Teams, and Security Auditors to maintain robust security posture, automate infrastructure discovery, and enforce enterprise governance.
@@ -16,6 +17,7 @@ An enterprise-grade collection of multi-cloud operational, security governance, 
 ```
 multi-cloud-automation-scripts/
 ├── .github/
+│   ├── FUNDING.yml                      # GitHub Sponsors Configuration
 │   └── workflows/
 │       └── lint-and-validate.yml        # CI/CD Script & Markdown Linting Workflow
 ├── azure/
@@ -105,6 +107,14 @@ Every commit and pull request is automatically validated against:
 - **PSScriptAnalyzer** for PowerShell code quality and security standards.
 - **ShellCheck** for Bash script reliability and POSIX compliance.
 - **MarkdownLint** for documentation formatting.
+
+---
+
+## 💖 Support & Sponsorship
+
+If you find these multi-cloud automation scripts helpful, consider supporting the project:
+
+[![Sponsor git-ranjan](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa.svg?style=for-the-badge&logo=github)](https://github.com/sponsors/git-ranjan)
 
 ---
 
