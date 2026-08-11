@@ -1,0 +1,31 @@
+# Generated Reports & Output Data
+*.csv
+*.json
+*.log
+*.tsv
+
+# Azure / Local Credential & Cache Directories
+.azure/
+.azure-credentials
+*.publishsettings
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
