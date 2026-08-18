@@ -45,8 +45,9 @@ foreach ($module in $modules) {
         It 'exposes the documented parameters' {
             $ast = [System.Management.Automation.Language.Parser]::ParseFile(
                 $psPath, [ref]$null, [ref]$null)
-            $paramBlocks = $ast.ParamBlock.Parent
-            $paramNames = $paramBlocks.Parameters.Name.Value
+            $paramNames = @($ast.ParamBlock.Parameters | ForEach-Object {
+                $_.Name.VariablePath.UserPath
+            })
             $paramNames | Should -Contain 'SubscriptionId'
             $paramNames | Should -Contain 'OutputPath'
             $paramNames | Should -Contain 'ExportFormat'
