@@ -1,0 +1,13 @@
+# Normalize line endings across the repository
+* text=auto
+
+# Shell scripts must stay LF to run on POSIX systems
+*.sh text eol=lf
+
+# Python sources follow PEP 8 conventions (LF)
+*.py text eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.ico binary
