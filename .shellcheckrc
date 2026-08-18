@@ -1,4 +1,0 @@
-# ShellCheck configuration
-# SC2016: jq expressions legitimately use single quotes with $variables
-# SC2155: declare-and-assign is used deliberately under set -euo pipefail
-disable=SC2016,SC2155

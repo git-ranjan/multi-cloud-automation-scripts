@@ -1,0 +1,50 @@
+name: Lint and Validate Scripts
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  powershell-lint:
+    name: Lint PowerShell Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          $results = Invoke-ScriptAnalyzer -Path ./ -Recurse -Severity Error,Warning
+          if ($results) {
+              $results | Format-Table -Auto
+              throw "PSScriptAnalyzer found $($results.Count) lint issue(s)."
+          } else {
+              Write-Host "PSScriptAnalyzer passed cleanly!"
+          }
+
+  shell-lint:
+    name: Lint Shell Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          ignore_paths: 'node_modules'
+
+  markdown-lint:
+    name: Validate Markdown
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Markdown files
+        run: |
+          find . -name "*.md" -type f | xargs -I {} grep -Hn "\[.*\]()" {} || true
