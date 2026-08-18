@@ -69,6 +69,7 @@ param (
 )
 
 Set-StrictMode -Version Latest
+$InformationPreference = 'Continue'
 
 # ---------------------------------------------------------------------------
 # Pre-flight: Az module
@@ -85,7 +86,7 @@ if (-not $context) {
     if ($NoAuthPrompt) {
         throw "No active Azure context and -NoAuthPrompt was specified. Authenticate first (e.g. Connect-AzAccount) or remove -NoAuthPrompt."
     }
-    Write-Host "No active Azure session found. Initiating login..." -ForegroundColor Yellow
+    Write-Information "No active Azure session found. Initiating login..."
     Connect-AzAccount -Environment $Environment -ErrorAction Stop | Out-Null
 }
 
@@ -128,7 +129,7 @@ if ($outputDirectory -and -not (Test-Path -LiteralPath $outputDirectory)) {
 $report = [System.Collections.Generic.List[PSCustomObject]]::new()
 
 foreach ($sub in $subscriptions) {
-    Write-Host "Auditing subscription: $($sub.Name) ($($sub.Id))..." -ForegroundColor Cyan
+    Write-Information "Auditing subscription: $($sub.Name) ($($sub.Id))..."
     $null = Set-AzContext -SubscriptionId $sub.Id -ErrorAction SilentlyContinue
 
     try {
@@ -162,7 +163,7 @@ foreach ($sub in $subscriptions) {
 # Export
 # ---------------------------------------------------------------------------
 if ($report.Count -eq 0) {
-    Write-Host "No storage accounts with Private Endpoints were found." -ForegroundColor Yellow
+    Write-Information "No storage accounts with Private Endpoints were found."
     return
 }
 
@@ -172,4 +173,4 @@ if ($ExportFormat -eq 'CSV') {
     $report | ConvertTo-Json -Depth 4 | Set-Content -Path $OutputPath -Encoding UTF8
 }
 
-Write-Host "Audit report exported ($($report.Count) storage account(s)): $OutputPath" -ForegroundColor Green
+Write-Information "Audit report exported ($($report.Count) storage account(s)): $OutputPath"

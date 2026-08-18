@@ -51,7 +51,7 @@ COLUMNS = (
 )
 
 
-def resolve_account(session: "boto3.Session") -> str:
+def resolve_account(session: boto3.Session) -> str:
     """Return the account ID of the current caller."""
     return session.client("sts").get_caller_identity()["Account"]
 

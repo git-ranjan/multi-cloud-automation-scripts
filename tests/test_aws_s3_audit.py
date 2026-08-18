@@ -1,18 +1,28 @@
 """Unit tests for the AWS S3 audit modules (mocked, no live AWS calls)."""
 
+import importlib.util
 import json
-import sys
 import unittest.mock as mock
 from pathlib import Path
 
-import pytest
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "aws" / "s3" / "audit-public-buckets"))
-sys.path.insert(0, str(REPO_ROOT / "aws" / "s3" / "audit-security-config"))
 
-from audit_bucket_security import audit_bucket as audit_security_bucket  # noqa: E402
-from audit_public_buckets import audit_bucket as audit_public_bucket  # noqa: E402
+
+def _load_module(name: str, rel_path: str):
+    spec = importlib.util.spec_from_file_location(name, REPO_ROOT / rel_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+audit_public_buckets = _load_module(
+    "aws_audit_public_buckets",
+    "aws/s3/audit-public-buckets/audit_public_buckets.py",
+)
+audit_bucket_security = _load_module(
+    "aws_audit_bucket_security",
+    "aws/s3/audit-security-config/audit_bucket_security.py",
+)
 
 
 def _client_error(code: str) -> Exception:
@@ -58,7 +68,7 @@ class TestPublicBuckets:
             ]
         }
 
-        row = audit_public_bucket(_make_s3(regional), "123456789012", "legacy-data")
+        row = audit_public_buckets.audit_bucket(_make_s3(regional), "123456789012", "legacy-data")
 
         assert row["public_access_block_enabled"] is False
         assert row["policy_public"] is False
@@ -85,7 +95,7 @@ class TestPublicBuckets:
             ]
         }
 
-        row = audit_public_bucket(_make_s3(regional), "123456789012", "open-data")
+        row = audit_public_buckets.audit_bucket(_make_s3(regional), "123456789012", "open-data")
 
         assert row["acl_public"] is True
         assert row["is_public"] is True
@@ -108,7 +118,7 @@ class TestPublicBuckets:
             ]
         }
 
-        row = audit_public_bucket(_make_s3(regional), "123456789012", "private-data")
+        row = audit_public_buckets.audit_bucket(_make_s3(regional), "123456789012", "private-data")
 
         assert row["is_public"] is False
 
@@ -142,7 +152,7 @@ class TestSecurityConfig:
         }
         regional.get_bucket_versioning.return_value = {"Status": "Enabled"}
 
-        row = audit_security_bucket(_make_s3(regional), "123456789012", "prod")
+        row = audit_bucket_security.audit_bucket(_make_s3(regional), "123456789012", "prod")
 
         assert row["hardened"] is True
         assert row["encryption_type"].startswith("aws:kms")
@@ -161,7 +171,7 @@ class TestSecurityConfig:
         regional.get_bucket_encryption.side_effect = _client_error("ServerSideEncryptionConfigurationNotFoundError")
         regional.get_bucket_versioning.return_value = {"Status": "Enabled"}
 
-        row = audit_security_bucket(_make_s3(regional), "123456789012", "unencrypted")
+        row = audit_bucket_security.audit_bucket(_make_s3(regional), "123456789012", "unencrypted")
 
         assert row["default_encryption"] is False
         assert row["encryption_type"] == "NONE"
@@ -180,8 +190,7 @@ class TestSecurityConfig:
                 "hardened": True,
             }
         ]
-        from audit_bucket_security import write_report
 
         out = tmp_path / "report.json"
-        write_report(rows, "json", str(out))
+        audit_bucket_security.write_report(rows, "json", str(out))
         assert json.loads(out.read_text()) == rows

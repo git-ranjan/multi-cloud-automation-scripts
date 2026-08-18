@@ -38,13 +38,13 @@ When you do create one, include:
 
 Feature requests are welcome. Please explain the problem you are trying to
 solve, not just the feature you want. New modules should follow the existing
-module structure (see [Repository Architecture](#repository-architecture)).
+module structure (see [Repository Architecture](../README.md#repository-architecture)).
 
 ### Adding a New Module
 
 Each module lives under a cloud provider directory and ships the same shape:
 
-```
+```text
 <provider>/<service>/<module-name>/
 ├── README.md                 # usage, permissions, and detection logic
 ├── <script>.py or .ps1       # primary implementation
@@ -115,7 +115,7 @@ than inventing a new structure.
 
 Use [Conventional Commits](https://www.conventionalcommits.org/):
 
-```
+```text
 <type>(<scope>): <short summary>
 
 <body (optional)>

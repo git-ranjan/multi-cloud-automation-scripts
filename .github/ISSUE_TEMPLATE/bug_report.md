@@ -6,30 +6,30 @@ labels: bug
 assignees: ""
 ---
 
-**Script / Module**
+## Script / Module
 
 <!-- Which provider, module, and language (PowerShell, Bash, Python, KQL)? -->
 
-**Command run**
+## Command run
 
 ```text
 <!-- Exact command line used -->
 ```
 
-**Expected behavior**
+## Expected behavior
 
-**Actual behavior**
+## Actual behavior
 
 ```text
 <!-- Full error output, sanitized of any account identifiers or secrets -->
 ```
 
-**Environment**
+## Environment
 
 - OS:
 - Tool versions (e.g. `$PSVersionTable`, `aws --version`, `python --version`):
 - Cloud module/SDK versions:
 
-**Additional context**
+## Additional context
 
 <!-- Any sanitized report excerpts or reproduction notes -->

@@ -17,6 +17,7 @@ Identify, audit, and report on Azure Storage Accounts configured with **Private 
 ## Quick Start
 
 ### 1. Azure PowerShell (`.ps1`)
+
 ```powershell
 # Audit all subscriptions and export to CSV
 .\audit-storage-with-pe.ps1 -OutputPath "PrivateEndpointStorageReport.csv"
@@ -26,6 +27,7 @@ Identify, audit, and report on Azure Storage Accounts configured with **Private 
 ```
 
 ### 2. Azure CLI / Bash (`.sh`)
+
 ```bash
 # Output results directly as a table
 ./audit-storage-with-pe.sh table
@@ -35,4 +37,5 @@ Identify, audit, and report on Azure Storage Accounts configured with **Private 
 ```
 
 ### 3. Azure Resource Graph Explorer (`.kql`)
+
 Paste the contents of [`audit-storage-with-pe.kql`](audit-storage-with-pe.kql) into [Azure Resource Graph Explorer](https://portal.azure.com/#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ResourceGraph%2Fqueries).
