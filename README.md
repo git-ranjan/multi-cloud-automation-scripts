@@ -21,7 +21,7 @@ infrastructure discovery, and enforce enterprise governance across
 
 ## Repository Architecture
 
-```
+```text
 multi-cloud-automation-scripts/
 ├── .github/
 │   ├── ISSUE_TEMPLATE/               # Bug & feature templates

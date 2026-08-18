@@ -6,21 +6,21 @@ labels: enhancement
 assignees: ""
 ---
 
-**Problem statement**
+## Problem statement
 
 <!-- What problem would this solve? Describe the scenario, not just the ask. -->
 
-**Proposed solution**
+## Proposed solution
 
 <!-- Describe the module/behavior and how it fits the existing repository structure. -->
 
-**Alternative approaches considered**
+## Alternative approaches considered
 
-**Scope**
+## Scope
 
 - [ ] New cloud provider
 - [ ] New service / module
 - [ ] Enhancement to an existing module
 - [ ] CI / tooling / documentation
 
-**Additional context**
+## Additional context

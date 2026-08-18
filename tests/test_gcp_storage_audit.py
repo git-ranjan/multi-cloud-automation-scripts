@@ -1,16 +1,27 @@
 """Unit tests for the GCP storage audit modules (mocked, no live GCP calls)."""
 
+import importlib.util
 import json
-import sys
-import unittest.mock as mock
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "gcp" / "storage" / "audit-public-buckets"))
-sys.path.insert(0, str(REPO_ROOT / "gcp" / "storage" / "audit-security-config"))
 
-from audit_bucket_security import audit_bucket as audit_security_bucket  # noqa: E402
-from audit_public_buckets import audit_bucket as audit_public_bucket  # noqa: E402
+
+def _load_module(name: str, rel_path: str):
+    spec = importlib.util.spec_from_file_location(name, REPO_ROOT / rel_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+audit_public_buckets = _load_module(
+    "gcp_audit_public_buckets",
+    "gcp/storage/audit-public-buckets/audit_public_buckets.py",
+)
+audit_bucket_security = _load_module(
+    "gcp_audit_bucket_security",
+    "gcp/storage/audit-security-config/audit_bucket_security.py",
+)
 
 
 class _FakePolicy:
@@ -52,7 +63,7 @@ class TestPublicBuckets:
             ),
         )
 
-        row = audit_public_bucket(bucket)
+        row = audit_public_buckets.audit_bucket(bucket)
 
         assert row["public"] is True
         assert "roles/storage.objectViewer" in row["public_roles"]
@@ -71,7 +82,7 @@ class TestPublicBuckets:
             ),
         )
 
-        row = audit_public_bucket(bucket)
+        row = audit_public_buckets.audit_bucket(bucket)
 
         assert row["public"] is False
 
@@ -84,7 +95,7 @@ class TestPublicBuckets:
             get_iam_error=exceptions.Forbidden("403"),
         )
 
-        row = audit_public_bucket(bucket)
+        row = audit_public_buckets.audit_bucket(bucket)
 
         assert row["public"] is None
         assert "403" in row["error"]
@@ -107,7 +118,7 @@ class TestSecurityConfig:
             },
         )
 
-        row = audit_security_bucket(bucket)
+        row = audit_bucket_security.audit_bucket(bucket)
 
         assert row["uniform_bucket_level_access"] is True
         assert row["public_access_prevention"] == "enforced"
@@ -126,14 +137,12 @@ class TestSecurityConfig:
             },
         )
 
-        row = audit_security_bucket(bucket)
+        row = audit_bucket_security.audit_bucket(bucket)
 
         assert row["public"] is True
         assert row["hardened"] is False
 
     def test_report_json_serializes(self, tmp_path):
-        from audit_bucket_security import write_report
-
         rows = [
             {
                 "project_id": "proj-1",
@@ -147,5 +156,5 @@ class TestSecurityConfig:
             }
         ]
         out = tmp_path / "report.json"
-        write_report(rows, "json", str(out))
+        audit_bucket_security.write_report(rows, "json", str(out))
         assert json.loads(out.read_text()) == rows
