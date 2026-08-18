@@ -9,8 +9,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "gcp" / "storage" / "audit-public-buckets"))
 sys.path.insert(0, str(REPO_ROOT / "gcp" / "storage" / "audit-security-config"))
 
-from audit_public_buckets import audit_bucket as audit_public_bucket  # noqa: E402
 from audit_bucket_security import audit_bucket as audit_security_bucket  # noqa: E402
+from audit_public_buckets import audit_bucket as audit_public_bucket  # noqa: E402
 
 
 class _FakePolicy:
