@@ -1,18 +1,19 @@
 // ==============================================================================
-// KQL Query: Find Azure Storage Accounts WITH Private Endpoints
+// KQL Query: Find Azure Storage Accounts with Private Endpoints
 // Target Service: Azure Resource Graph Explorer
-// Run in: portal.azure.com -> Resource Graph Explorer
 // ==============================================================================
 
 resources
 | where type =~ 'microsoft.storage/storageaccounts'
 | extend peConnections = properties.privateEndpointConnections
-| where isnotnull(peConnections) and array_length(peConnections) > 0
-| mv-expand peConnections
-| extend status = tostring(peConnections.properties.privateLinkServiceConnectionState.status)
-| summarize
-    privateEndpointCount = count(),
-    connectionStatuses = make_set(status)
-    by subscriptionId, resourceGroup, storageAccountName = name, location,
-       sku = sku.name, publicNetworkAccess = tostring(properties.publicNetworkAccess)
+| extend peCount = array_length(peConnections)
+| where peCount > 0
+| project 
+    subscriptionId,
+    resourceGroup,
+    storageAccountName = name,
+    location,
+    sku = sku.name,
+    privateEndpointCount = peCount,
+    privateEndpointConnections = peConnections
 | sort by privateEndpointCount desc

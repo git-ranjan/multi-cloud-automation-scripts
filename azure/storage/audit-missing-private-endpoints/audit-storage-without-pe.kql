@@ -1,7 +1,6 @@
 // ==============================================================================
 // KQL Query: Find Azure Storage Accounts WITHOUT Private Endpoints
 // Target Service: Azure Resource Graph Explorer
-// Run in: portal.azure.com -> Resource Graph Explorer
 // ==============================================================================
 
 resources
@@ -9,14 +8,12 @@ resources
 | extend peConnections = properties.privateEndpointConnections
 | extend peCount = array_length(peConnections)
 | where peCount == 0 or isnull(peCount)
-| project
+| project 
     subscriptionId,
     resourceGroup,
     storageAccountName = name,
     location,
     sku = sku.name,
-    publicNetworkAccess = tostring(properties.publicNetworkAccess),
-    allowBlobPublicAccess = tobool(properties.allowBlobPublicAccess),
-    minTlsVersion = tostring(properties.minimumTlsVersion),
-    requireSecureTransfer = tobool(properties.supportsHttpsTrafficOnly)
-| sort by resourceGroup asc, storageAccountName asc
+    publicNetworkAccess = properties.publicNetworkAccess,
+    allowBlobPublicAccess = properties.allowBlobPublicAccess
+| sort by resourceGroup ascii
