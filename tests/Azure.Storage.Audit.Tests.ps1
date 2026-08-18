@@ -2,101 +2,91 @@
 # Pester 5.x tests validating the Azure Storage audit modules without
 # requiring an Azure subscription (parse/structure-level coverage).
 
-$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-
-$modules = @(
-    @{
-        Name     = 'audit-private-endpoints'
-        PsScript = 'audit-storage-with-pe.ps1'
-        Kql      = 'audit-storage-with-pe.kql'
-        Sh       = 'audit-storage-with-pe.sh'
-    },
-    @{
-        Name     = 'audit-missing-private-endpoints'
-        PsScript = 'audit-storage-without-pe.ps1'
-        Kql      = 'audit-storage-without-pe.kql'
-        Sh       = 'audit-storage-without-pe.sh'
-    }
-)
-
 Describe 'Azure Storage audit module layout' {
     It 'exposes a README, PowerShell, Bash and KQL implementation for each module' {
-        foreach ($module in $modules) {
-            $dir = Join-Path $repoRoot "azure\storage\$($module.Name)"
-            foreach ($file in @('README.md', $module.PsScript, $module.Kql, $module.Sh)) {
-                Test-Path -LiteralPath (Join-Path $dir $file) | Should -BeTrue
+        $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+        foreach ($moduleName in @('audit-private-endpoints', 'audit-missing-private-endpoints')) {
+            $dir = Join-Path $repoRoot "azure\storage\$moduleName"
+            foreach ($file in @('README.md', '*.ps1', '*.kql', '*.sh')) {
+                (Get-ChildItem -LiteralPath $dir -Filter $file -ErrorAction Stop).Count |
+                    Should -BeGreaterThan 0
             }
         }
     }
 }
 
-foreach ($module in $modules) {
-    $psPath = Join-Path $repoRoot "azure\storage\$($module.Name)\$($module.PsScript)"
-
-    Describe "$($module.PsScript) - static validation" {
-        It 'parses without syntax errors' {
-            $tokens = $null
-            $parseErrors = $null
-            [System.Management.Automation.Language.Parser]::ParseFile(
-                $psPath, [ref]$tokens, [ref]$parseErrors) | Out-Null
-            $parseErrors | Should -BeNullOrEmpty
-        }
-
-        It 'exposes the documented parameters' {
-            $ast = [System.Management.Automation.Language.Parser]::ParseFile(
-                $psPath, [ref]$null, [ref]$null)
-            $paramNames = @($ast.ParamBlock.Parameters | ForEach-Object {
-                $_.Name.VariablePath.UserPath
-            })
-            $paramNames | Should -Contain 'SubscriptionId'
-            $paramNames | Should -Contain 'OutputPath'
-            $paramNames | Should -Contain 'ExportFormat'
-            $paramNames | Should -Contain 'Environment'
-            $paramNames | Should -Contain 'NoAuthPrompt'
-        }
-
-        It 'is strictly read-only (no mutating cmdlets)' {
-            $content = Get-Content -Raw -LiteralPath $psPath
-            $content | Should -Not -Match 'Remove-|New-Az|Set-Az(?!Context)|Update-Az|Add-Az'
-        }
-
-        It 'contains comment-based help' {
-            $content = Get-Content -Raw -LiteralPath $psPath
-            $content | Should -Match '\.SYNOPSIS'
-            $content | Should -Match '\.DESCRIPTION'
-            $content | Should -Match '\.EXAMPLE'
+Describe '<ModuleName> - static validation' -ForEach @(
+    @{ ModuleName = 'audit-private-endpoints' },
+    @{ ModuleName = 'audit-missing-private-endpoints' }
+) {
+    BeforeAll {
+        $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+        $base = Join-Path $repoRoot "azure\storage\$ModuleName"
+        $script:module = @{
+            Directory = $base
+            PsScript  = Join-Path $base (Get-ChildItem -LiteralPath $base -Filter *.ps1 |
+                Select-Object -ExpandProperty Name -First 1)
+            Kql       = Join-Path $base (Get-ChildItem -LiteralPath $base -Filter *.kql |
+                Select-Object -ExpandProperty Name -First 1)
+            Sh        = Join-Path $base (Get-ChildItem -LiteralPath $base -Filter *.sh |
+                Select-Object -ExpandProperty Name -First 1)
         }
     }
 
-    $kqlPath = Join-Path $repoRoot "azure\storage\$($module.Name)\$($module.Kql)"
-    Describe "$($module.Kql) - static validation" {
-        It 'targets storage accounts through Azure Resource Graph' {
-            Get-Content -Raw -LiteralPath $kqlPath |
-                Should -Match "type =~ 'microsoft.storage/storageaccounts'"
-        }
+    It 'parses the PowerShell script without syntax errors' {
+        $tokens = $null
+        $parseErrors = $null
+        [System.Management.Automation.Language.Parser]::ParseFile(
+            $script:module.PsScript, [ref]$tokens, [ref]$parseErrors) | Out-Null
+        $parseErrors | Should -BeNullOrEmpty
+    }
 
-        It 'projects subscriptionId and resourceGroup columns' {
-            $content = Get-Content -Raw -LiteralPath $kqlPath
-            $content | Should -Match 'subscriptionId'
-            $content | Should -Match 'resourceGroup'
+    It 'exposes the documented parameters on the PowerShell script' {
+        $ast = [System.Management.Automation.Language.Parser]::ParseFile(
+            $script:module.PsScript, [ref]$null, [ref]$null)
+        $paramNames = @($ast.ParamBlock.Parameters | ForEach-Object {
+            $_.Name.VariablePath.UserPath
+        })
+        foreach ($expected in @('SubscriptionId', 'OutputPath', 'ExportFormat', 'Environment', 'NoAuthPrompt')) {
+            $paramNames | Should -Contain $expected
         }
     }
 
-    $shPath = Join-Path $repoRoot "azure\storage\$($module.Name)\$($module.Sh)"
-    Describe "$($module.Sh) - static validation" {
-        It 'is a POSIX bash script' {
-            Get-Content -TotalCount 1 -LiteralPath $shPath |
-                Should -Match '^#!/usr/bin/env bash'
-        }
+    It 'is strictly read-only (no mutating cmdlets)' {
+        $content = Get-Content -Raw -LiteralPath $script:module.PsScript
+        $content | Should -Not -Match 'Remove-|New-Az|Set-Az(?!Context)|Update-Az|Add-Az'
+    }
 
-        It 'aborts on error and pipelines (set -euo pipefail)' {
-            Get-Content -Raw -LiteralPath $shPath | Should -Match 'set -euo pipefail'
-        }
+    It 'contains comment-based help' {
+        $content = Get-Content -Raw -LiteralPath $script:module.PsScript
+        $content | Should -Match '\.SYNOPSIS'
+        $content | Should -Match '\.DESCRIPTION'
+        $content | Should -Match '\.EXAMPLE'
+    }
 
-        It 'verifies az CLI availability and login state' {
-            $content = Get-Content -Raw -LiteralPath $shPath
-            $content | Should -Match 'command -v az'
-            $content | Should -Match 'az account show'
-        }
+    It 'targets storage accounts through Azure Resource Graph' {
+        Get-Content -Raw -LiteralPath $script:module.Kql |
+            Should -Match "type =~ 'microsoft.storage/storageaccounts'"
+    }
+
+    It 'projects subscriptionId and resourceGroup columns' {
+        $content = Get-Content -Raw -LiteralPath $script:module.Kql
+        $content | Should -Match 'subscriptionId'
+        $content | Should -Match 'resourceGroup'
+    }
+
+    It 'is a POSIX bash script' {
+        Get-Content -TotalCount 1 -LiteralPath $script:module.Sh |
+            Should -Match '^#!/usr/bin/env bash'
+    }
+
+    It 'aborts on error and pipelines (set -euo pipefail)' {
+        Get-Content -Raw -LiteralPath $script:module.Sh | Should -Match 'set -euo pipefail'
+    }
+
+    It 'verifies az CLI availability and login state' {
+        $content = Get-Content -Raw -LiteralPath $script:module.Sh
+        $content | Should -Match 'command -v az'
+        $content | Should -Match 'az account show'
     }
 }
