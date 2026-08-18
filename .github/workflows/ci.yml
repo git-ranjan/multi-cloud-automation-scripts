@@ -1,0 +1,155 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ------------------------------------------------------------------------- #
+  # Static analysis
+  # ------------------------------------------------------------------------- #
+  powershell-lint:
+    name: Lint PowerShell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run PSScriptAnalyzer
+        shell: pwsh
+        run: |
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser -ErrorAction Stop
+          $results = Invoke-ScriptAnalyzer -Path ./ -Recurse -Severity Error,Warning
+          if ($results) {
+              $results | Format-Table -Auto
+              throw "PSScriptAnalyzer found $($results.Count) lint issue(s)."
+          }
+          Write-Host "PSScriptAnalyzer passed cleanly!"
+
+  shell-lint:
+    name: Lint Shell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+
+      - name: Bash syntax check
+        run: |
+          while IFS= read -r script; do
+            echo "Checking $script"
+            bash -n "$script"
+          done < <(find . -type f -name "*.sh" -not -path "./.git/*")
+
+  python-lint:
+    name: Lint Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Run ruff
+        run: ruff check .
+
+  markdown-lint:
+    name: Lint Markdown
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run markdownlint-cli2
+        run: |
+          npm install -g markdownlint-cli2
+          markdownlint-cli2 "**/*.md" "#**/node_modules/**"
+
+  yaml-lint:
+    name: Lint YAML
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run yamllint
+        run: |
+          pip install yamllint
+          yamllint .
+
+  # ------------------------------------------------------------------------- #
+  # Tests
+  # ------------------------------------------------------------------------- #
+  powershell-test:
+    name: Test PowerShell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Pester
+        shell: pwsh
+        run: |
+          Install-Module Pester -RequiredVersion 5.5.0 -Force -Scope CurrentUser -ErrorAction Stop
+          $results = Invoke-Pester -Path ./tests -Output Detailed -PassThru
+          if ($results.FailedCount -gt 0) {
+              throw "Pester: $($results.FailedCount) test(s) failed."
+          }
+
+  python-test:
+    name: Test Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install -r aws/requirements.txt -r gcp/requirements.txt pytest
+
+      - name: Run pytest
+        run: pytest -v
+
+  # ------------------------------------------------------------------------- #
+  # Repository-level invariants
+  # ------------------------------------------------------------------------- #
+  structure:
+    name: Validate structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify required files and provider layout
+        run: |
+          set -e
+          for provider in aws azure gcp; do
+            [ -d "$provider" ] || { echo "missing provider directory: $provider"; exit 1; }
+            [ -d "$provider" ] && [ -z "$(find "$provider" -type f | head -n 1)" ] && { echo "provider directory empty: $provider"; exit 1; }
+          done
+          for required in README.md LICENSE .gitignore; do
+            [ -f "$required" ] || { echo "missing required file: $required"; exit 1; }
+          done
+          echo "Repository structure OK."
