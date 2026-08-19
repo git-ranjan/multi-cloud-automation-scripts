@@ -1,7 +1,7 @@
 # Multi-Cloud Automation Scripts
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/git-ranjan/multi-cloud-automation-scripts/actions/workflows/ci.yml/badge.svg)](.github/workflows/ci.yml)
+[![CI](https://github.com/priyaranjan-sahu/multi-cloud-automation-scripts/actions/workflows/ci.yml/badge.svg)](.github/workflows/ci.yml)
 [![Azure](https://img.shields.io/badge/Provider-Microsoft%20Azure-blue.svg)](https://azure.microsoft.com/)
 [![AWS](https://img.shields.io/badge/Provider-Amazon%20Web%20Services-orange.svg)](https://aws.amazon.com/)
 [![GCP](https://img.shields.io/badge/Provider-Google%20Cloud-4285F4.svg)](https://cloud.google.com/)
@@ -9,7 +9,7 @@
 [![Bash](https://img.shields.io/badge/Language-Bash-4EAA25.svg)](https://www.gnu.org/software/bash/)
 [![Python](https://img.shields.io/badge/Language-Python-3776AB.svg)](https://www.python.org/)
 [![KQL](https://img.shields.io/badge/Language-KQL-0078D4.svg)](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/query/)
-[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa.svg)](https://github.com/sponsors/git-ranjan)
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa.svg)](https://github.com/sponsors/priyaranjan-sahu)
 
 A collection of operational and security automation scripts for **Microsoft Azure**,
 **Amazon Web Services**, and **Google Cloud**. Mostly read-only audit utilities:
@@ -179,7 +179,7 @@ checks. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for contribution guidelines.
 If you find these multi-cloud automation scripts helpful, consider supporting
 the project:
 
-[![Sponsor git-ranjan](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa.svg?style=for-the-badge&logo=github)](https://github.com/sponsors/git-ranjan)
+[![Sponsor priyaranjan-sahu](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa.svg?style=for-the-badge&logo=github)](https://github.com/sponsors/priyaranjan-sahu)
 
 ---
 
