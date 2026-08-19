@@ -57,10 +57,10 @@ than inventing a new structure.
 
 ## Development Workflow
 
-1. Branch off `develop` (never work directly on `main`).
+1. Branch off `main` (never commit directly to it).
 2. Use a descriptive branch name: `feat/<provider>-<description>` or
    `fix/<provider>-<description>`.
-3. Open a Pull Request against `develop`.
+3. Open a Pull Request against `main`.
 4. All checks in the CI pipeline must pass before merging.
 
 ## Coding Standards
