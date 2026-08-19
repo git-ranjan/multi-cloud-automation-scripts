@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-08-19
+
 ### Added
 
 - **AWS** modules under `aws/s3/`:
@@ -31,10 +33,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Governance**: `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`,
   issue and PR templates, `CODEOWNERS`, Dependabot, EditorConfig, pre-commit
   hooks, Makefile, and `.gitattributes`.
+- **Docs**: redacted sample reports under `docs/samples/` and a shared report
+  format reference in `docs/report-format.md`.
+- **Quality**: pytest coverage reporting with a Codecov badge.
 
 ### Changed
 
-- README restructured for multi-cloud coverage and usage examples.
+- README restructured for multi-cloud coverage and usage examples, including a
+  cross-cloud control matrix and sample output.
+- CI pipeline scoped to the `main` branch.
 
 ## [0.1.0] - Initial Release
 
