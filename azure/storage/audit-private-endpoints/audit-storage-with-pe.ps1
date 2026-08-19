@@ -1,65 +1,135 @@
 <#
 .SYNOPSIS
-    Audits Azure Storage Accounts that have Private Endpoints configured.
+    Audits Azure Storage Accounts configured with Private Endpoints.
 
 .DESCRIPTION
-    This script queries Azure Storage Accounts across one or all accessible subscriptions
-    and extracts metadata for Storage Accounts configured with Private Endpoints.
-    Outputs the result to CSV or JSON format.
+    Queries Azure Storage Accounts across one or all accessible subscriptions and
+    reports metadata for accounts that have at least one Private Endpoint connection.
+    Results are exported to CSV or JSON.
+
+    This script is strictly read-only and requires at least the Reader role on every
+    subscription it audits.
 
 .PARAMETER SubscriptionId
-    Optional. The specific Azure Subscription ID to audit. If omitted, audits all accessible subscriptions.
+    One or more Azure Subscription IDs to audit. If omitted, all accessible
+    subscriptions are audited.
+
+.PARAMETER Environment
+    The Azure cloud environment to connect to. Defaults to AzureCloud.
+
+.PARAMETER NoAuthPrompt
+    Prevents the script from launching an interactive browser login. When no Azure
+    context is available and this switch is set, the script fails fast with an
+    actionable error. Use this in CI or with an existing service principal context.
 
 .PARAMETER OutputPath
-    Optional. The file path to save the generated audit report. Defaults to "StorageAccountsWithPrivateEndpoints.csv".
+    Path where the audit report is written. When omitted a timestamped file is
+    generated in the current directory.
 
 .PARAMETER ExportFormat
-    Optional. The output format: 'CSV' or 'JSON'. Defaults to 'CSV'.
+    Output format: 'CSV' or 'JSON'. Defaults to 'CSV'.
 
 .EXAMPLE
-    .\audit-storage-with-pe.ps1 -SubscriptionId "00000000-0000-0000-0000-000000000000" -OutputPath "PE_Audit.csv"
+    .\audit-storage-with-pe.ps1 -OutputPath "PE_Audit.csv"
 
 .EXAMPLE
-    .\audit-storage-with-pe.ps1 -ExportFormat JSON -OutputPath "PE_Audit.json"
+    .\audit-storage-with-pe.ps1 -SubscriptionId "00000000-0000-0000-0000-000000000000","11111111-1111-1111-1111-111111111111" -ExportFormat JSON -OutputPath "PE_Audit.json"
+
+.EXAMPLE
+    # Run in CI with an already established service principal context
+    .\audit-storage-with-pe.ps1 -NoAuthPrompt -OutputPath "PE_Audit.json" -ExportFormat JSON
+
+.NOTES
+    Subscriptions are processed sequentially. The Azure context is process-global, so
+    parallel runspaces would need re-authentication per runspace; sequential iteration
+    keeps the audit deterministic and avoids context races.
+
+.LINK
+    https://learn.microsoft.com/azure/private-link/private-endpoint-overview
 #>
 
 [CmdletBinding()]
 param (
     [Parameter(Mandatory = $false)]
-    [string]$SubscriptionId,
+    [string[]]$SubscriptionId,
 
     [Parameter(Mandatory = $false)]
-    [string]$OutputPath = "StorageAccountsWithPrivateEndpoints.csv",
+    [ValidateSet('AzureCloud', 'AzureUSGovernment', 'AzureChinaCloud', 'AzureGermanyCloud')]
+    [string]$Environment = 'AzureCloud',
 
     [Parameter(Mandatory = $false)]
-    [ValidateSet("CSV", "JSON")]
-    [string]$ExportFormat = "CSV"
+    [switch]$NoAuthPrompt,
+
+    [Parameter(Mandatory = $false)]
+    [string]$OutputPath,
+
+    [Parameter(Mandatory = $false)]
+    [ValidateSet('CSV', 'JSON')]
+    [string]$ExportFormat = 'CSV'
 )
 
-# Ensure Az module is available
-if (-not (Get-Module -Name Az.Accounts -ListAvailable)) {
-    Write-Error "The Azure PowerShell module (Az) is not installed. Please install it using 'Install-Module -Name Az'."
-    return
+Set-StrictMode -Version Latest
+$InformationPreference = 'Continue'
+
+# ---------------------------------------------------------------------------
+# Pre-flight: Az module
+# ---------------------------------------------------------------------------
+if (-not (Get-Module -Name Az.Accounts -ListAvailable) -or -not (Get-Module -Name Az.Storage -ListAvailable)) {
+    throw "The Azure PowerShell modules (Az.Accounts, Az.Storage) are required. Install with 'Install-Module -Name Az -Scope CurrentUser -Force'."
 }
 
-# Verify Azure context
+# ---------------------------------------------------------------------------
+# Authentication
+# ---------------------------------------------------------------------------
 $context = Get-AzContext
 if (-not $context) {
-    Write-Host "No active Azure session found. Initiating Login..." -ForegroundColor Yellow
-    Connect-AzAccount | Out-Null
+    if ($NoAuthPrompt) {
+        throw "No active Azure context and -NoAuthPrompt was specified. Authenticate first (e.g. Connect-AzAccount) or remove -NoAuthPrompt."
+    }
+    Write-Information "No active Azure session found. Initiating login..."
+    Connect-AzAccount -Environment $Environment -ErrorAction Stop | Out-Null
 }
 
-# Select target subscriptions
+# ---------------------------------------------------------------------------
+# Subscription selection
+# ---------------------------------------------------------------------------
+$allSubscriptions = Get-AzSubscription -ErrorAction Stop
+
 if ($SubscriptionId) {
-    $subscriptions = Get-AzSubscription -SubscriptionId $SubscriptionId -ErrorAction Stop
+    $matched = foreach ($id in $SubscriptionId) {
+        $allSubscriptions | Where-Object { $_.Id -eq $id } | Select-Object -First 1
+    }
+    $subscriptions = @($matched | Where-Object { $_ })
+
+    if ($SubscriptionId.Count -ne $subscriptions.Count) {
+        Write-Warning "One or more SubscriptionId values did not match an accessible subscription and were skipped."
+    }
+    if ($subscriptions.Count -eq 0) {
+        throw "No matching subscriptions found for the provided SubscriptionId parameter(s)."
+    }
 } else {
-    $subscriptions = Get-AzSubscription -ErrorAction Stop
+    $subscriptions = $allSubscriptions
 }
 
+# ---------------------------------------------------------------------------
+# Output path resolution
+# ---------------------------------------------------------------------------
+if (-not $PSBoundParameters.ContainsKey('OutputPath')) {
+    $extension = if ($ExportFormat -eq 'JSON') { 'json' } else { 'csv' }
+    $OutputPath = "StorageAccountsWithPrivateEndpoints_$(Get-Date -Format 'yyyyMMdd_HHmmss').$extension"
+}
+$outputDirectory = Split-Path -Parent $OutputPath
+if ($outputDirectory -and -not (Test-Path -LiteralPath $outputDirectory)) {
+    $null = New-Item -ItemType Directory -Path $outputDirectory -Force
+}
+
+# ---------------------------------------------------------------------------
+# Audit
+# ---------------------------------------------------------------------------
 $report = [System.Collections.Generic.List[PSCustomObject]]::new()
 
 foreach ($sub in $subscriptions) {
-    Write-Host "Auditing Subscription: $($sub.Name) ($($sub.Id))..." -ForegroundColor Cyan
+    Write-Information "Auditing subscription: $($sub.Name) ($($sub.Id))..."
     $null = Set-AzContext -SubscriptionId $sub.Id -ErrorAction SilentlyContinue
 
     try {
@@ -69,9 +139,6 @@ foreach ($sub in $subscriptions) {
             $peConnections = Get-AzPrivateEndpointConnection -PrivateLinkResourceId $sa.Id -ErrorAction SilentlyContinue
 
             if ($peConnections -and $peConnections.Count -gt 0) {
-                $peNames = ($peConnections.Name -join ", ")
-                $peStates = ($peConnections.PrivateLinkServiceConnectionState.Status -join ", ")
-
                 $report.Add([PSCustomObject]@{
                     SubscriptionId       = $sub.Id
                     SubscriptionName     = $sub.Name
@@ -79,26 +146,31 @@ foreach ($sub in $subscriptions) {
                     StorageAccountName   = $sa.StorageAccountName
                     Location             = $sa.Location
                     SKU                  = $sa.Sku.Name
+                    PublicNetworkAccess  = if ($null -ne $sa.PublicNetworkAccess) { $sa.PublicNetworkAccess } else { 'Unknown' }
+                    RequireSecureTransfer = $sa.EnableHttpsTrafficOnly
                     PrivateEndpointCount = $peConnections.Count
-                    PrivateEndpointNames = $peNames
-                    ConnectionStatus     = $peStates
+                    PrivateEndpointNames = ($peConnections.Name -join ', ')
+                    ConnectionStatus     = ($peConnections.PrivateLinkServiceConnectionState.Status -join ', ')
                 })
             }
         }
     } catch {
-        Write-Warning "Failed to query storage accounts in subscription $($sub.Name): $_"
+        Write-Warning "Failed to query storage accounts in subscription '$($sub.Name)': $_"
     }
 }
 
-# Export Results
+# ---------------------------------------------------------------------------
+# Export
+# ---------------------------------------------------------------------------
 if ($report.Count -eq 0) {
-    Write-Host "No storage accounts with Private Endpoints were found." -ForegroundColor Yellow
-} else {
-    if ($ExportFormat -eq "CSV") {
-        $report | Export-Csv -Path $OutputPath -NoTypeInformation -Encoding UTF8
-        Write-Host "Audit report successfully exported to CSV: $OutputPath" -ForegroundColor Green
-    } else {
-        $report | ConvertTo-Json -Depth 4 | Set-Content -Path $OutputPath -Encoding UTF8
-        Write-Host "Audit report successfully exported to JSON: $OutputPath" -ForegroundColor Green
-    }
+    Write-Information "No storage accounts with Private Endpoints were found."
+    return
 }
+
+if ($ExportFormat -eq 'CSV') {
+    $report | Export-Csv -Path $OutputPath -NoTypeInformation -Encoding UTF8
+} else {
+    $report | ConvertTo-Json -Depth 4 | Set-Content -Path $OutputPath -Encoding UTF8
+}
+
+Write-Information "Audit report exported ($($report.Count) storage account(s)): $OutputPath"

@@ -17,6 +17,7 @@ Identify, audit, and report on Azure Storage Accounts that **DO NOT** have Priva
 ## Quick Start
 
 ### 1. Azure PowerShell (`.ps1`)
+
 ```powershell
 # Audit all subscriptions for exposed storage accounts and export to CSV
 .\audit-storage-without-pe.ps1 -OutputPath "ExposedStorageAccounts.csv"
@@ -26,6 +27,7 @@ Identify, audit, and report on Azure Storage Accounts that **DO NOT** have Priva
 ```
 
 ### 2. Azure CLI / Bash (`.sh`)
+
 ```bash
 # Output results directly as a table
 ./audit-storage-without-pe.sh table
@@ -35,4 +37,5 @@ Identify, audit, and report on Azure Storage Accounts that **DO NOT** have Priva
 ```
 
 ### 3. Azure Resource Graph Explorer (`.kql`)
+
 Paste the contents of [`audit-storage-without-pe.kql`](audit-storage-without-pe.kql) into [Azure Resource Graph Explorer](https://portal.azure.com/#blade/HubsExtension/BrowseResourceBlade/resourceType/Microsoft.ResourceGraph%2Fqueries).
