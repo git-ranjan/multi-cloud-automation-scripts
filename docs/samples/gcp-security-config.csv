@@ -1,0 +1,7 @@
+project_id,bucket,location,uniform_bucket_level_access,public_access_prevention,public,hardened,error
+acme-prod,acme-reports,us-central1,True,enforced,False,True,
+acme-prod,acme-billing-export,europe-west1,True,inherited,False,False,
+acme-prod,acme-website-assets,us-east1,True,enforced,True,False,
+acme-prod,acme-mobile-backups,us-west1,False,unspecified,True,False,
+acme-dev,dev-build-artifacts,us-east1,True,enforced,True,False,
+acme-dev,dev-database-dumps,us-central1,False,unspecified,False,False,

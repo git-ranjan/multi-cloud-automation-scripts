@@ -10,6 +10,9 @@
 [![Python](https://img.shields.io/badge/Language-Python-3776AB.svg)](https://www.python.org/)
 [![KQL](https://img.shields.io/badge/Language-KQL-0078D4.svg)](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/query/)
 [![Sponsor](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa.svg)](https://github.com/sponsors/priyaranjan-sahu)
+[![Release](https://img.shields.io/github/v/release/priyaranjan-sahu/multi-cloud-automation-scripts)](https://github.com/priyaranjan-sahu/multi-cloud-automation-scripts/releases)
+[![Last commit](https://img.shields.io/github/last-commit/priyaranjan-sahu/multi-cloud-automation-scripts)](https://github.com/priyaranjan-sahu/multi-cloud-automation-scripts/commits/main)
+[![codecov](https://codecov.io/gh/priyaranjan-sahu/multi-cloud-automation-scripts/branch/main/graph/badge.svg)](https://codecov.io/gh/priyaranjan-sahu/multi-cloud-automation-scripts)
 
 A collection of operational and security automation scripts for **Microsoft Azure**,
 **Amazon Web Services**, and **Google Cloud**. Mostly read-only audit utilities:
@@ -44,6 +47,9 @@ multi-cloud-automation-scripts/
 │       ├── audit-public-buckets/         # GCS public IAM exposure detection
 │       └── audit-security-config/        # GCS hardening compliance matrix
 ├── tests/                            # Pester (PowerShell) + pytest (Python)
+├── docs/
+│   ├── samples/                      # Redacted example audit reports
+│   └── report-format.md              # Output contract shared across clouds
 ├── CONTRIBUTING.md
 ├── SECURITY.md
 ├── CHANGELOG.md
@@ -76,6 +82,34 @@ multi-cloud-automation-scripts/
 | :--- | :--- | :--- |
 | **[Audit Public Buckets](gcp/storage/audit-public-buckets/)** | Detect GCS buckets with public IAM bindings (`allUsers` / `allAuthenticatedUsers`). | Python, Bash |
 | **[Audit Security Config](gcp/storage/audit-security-config/)** | Compliance matrix for uniform bucket-level access, public access prevention, and public bindings. | Python, Bash |
+
+---
+
+## What Each Module Checks
+
+The same security controls mapped across all three clouds. A module flags a
+finding when the relevant column says so — see
+[`docs/report-format.md`](docs/report-format.md) for the full field contract.
+
+| Security Control | Microsoft Azure | Amazon Web Services | Google Cloud |
+| :--- | :--- | :--- | :--- |
+| Public exposure | Missing Private Endpoints, public network access, anonymous blob access | Public Access Block, bucket policy, ACL grants | Public IAM bindings (`allUsers` / `allAuthenticatedUsers`) |
+| Encryption | TLS version + HTTPS-only | Default encryption (SSE-S3 / SSE-KMS) | — |
+| Versioning | — | Bucket versioning | — |
+| Access model | Private Endpoint links | — | Uniform bucket-level access |
+
+---
+
+## Sample Output
+
+Redacted example reports for every module live in [`docs/samples/`](docs/samples/).
+Here is what the AWS public-bucket audit produces:
+
+| bucket | region | public_access_block_enabled | policy_public | acl_public | is_public |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `app-assets-prod` | us-east-1 | True | False | False | False |
+| `legacy-media` | us-east-1 | False | True | True | True |
+| `backups` | us-west-2 | False | False | False | True |
 
 ---
 

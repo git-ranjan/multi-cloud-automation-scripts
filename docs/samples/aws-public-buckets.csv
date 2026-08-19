@@ -1,0 +1,8 @@
+account_id,bucket,region,public_access_block_enabled,policy_public,acl_public,acl_public_permissions,is_public
+111122223333,app-assets-prod,us-east-1,True,False,False,,False
+111122223333,logs-eu-central-1,eu-central-1,True,False,False,,False
+111122223333,terraform-state,us-east-1,True,False,False,,False
+111122223333,ci-artifacts,ap-south-1,True,False,False,,False
+111122223333,legacy-media,us-east-1,False,True,True,READ,True
+111122223333,backups,us-west-2,False,False,False,,True
+111122223333,data-warehouse-export,eu-west-1,False,True,False,,True

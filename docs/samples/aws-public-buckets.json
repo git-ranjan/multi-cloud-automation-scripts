@@ -1,0 +1,72 @@
+[
+  {
+    "account_id": "111122223333",
+    "bucket": "app-assets-prod",
+    "region": "us-east-1",
+    "public_access_block_enabled": true,
+    "policy_public": false,
+    "acl_public": false,
+    "acl_public_permissions": "",
+    "is_public": false
+  },
+  {
+    "account_id": "111122223333",
+    "bucket": "logs-eu-central-1",
+    "region": "eu-central-1",
+    "public_access_block_enabled": true,
+    "policy_public": false,
+    "acl_public": false,
+    "acl_public_permissions": "",
+    "is_public": false
+  },
+  {
+    "account_id": "111122223333",
+    "bucket": "terraform-state",
+    "region": "us-east-1",
+    "public_access_block_enabled": true,
+    "policy_public": false,
+    "acl_public": false,
+    "acl_public_permissions": "",
+    "is_public": false
+  },
+  {
+    "account_id": "111122223333",
+    "bucket": "ci-artifacts",
+    "region": "ap-south-1",
+    "public_access_block_enabled": true,
+    "policy_public": false,
+    "acl_public": false,
+    "acl_public_permissions": "",
+    "is_public": false
+  },
+  {
+    "account_id": "111122223333",
+    "bucket": "legacy-media",
+    "region": "us-east-1",
+    "public_access_block_enabled": false,
+    "policy_public": true,
+    "acl_public": true,
+    "acl_public_permissions": "READ",
+    "is_public": true
+  },
+  {
+    "account_id": "111122223333",
+    "bucket": "backups",
+    "region": "us-west-2",
+    "public_access_block_enabled": false,
+    "policy_public": false,
+    "acl_public": false,
+    "acl_public_permissions": "",
+    "is_public": true
+  },
+  {
+    "account_id": "111122223333",
+    "bucket": "data-warehouse-export",
+    "region": "eu-west-1",
+    "public_access_block_enabled": false,
+    "policy_public": true,
+    "acl_public": false,
+    "acl_public_permissions": "",
+    "is_public": true
+  }
+]

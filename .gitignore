@@ -4,6 +4,10 @@
 *.log
 *.tsv
 
+# Committed example outputs (docs/samples)
+!docs/samples/*.csv
+!docs/samples/*.json
+
 # Azure / Local Credential & Cache Directories
 .azure/
 .azure-credentials

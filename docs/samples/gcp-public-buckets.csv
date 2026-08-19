@@ -1,0 +1,7 @@
+project_id,bucket,location,storage_class,public,public_roles,public_members,error
+acme-prod,acme-website-assets,us-east1,STANDARD,True,roles/storage.objectViewer,allUsers,
+acme-prod,acme-reports,us-central1,STANDARD,False,,,
+acme-prod,acme-billing-export,europe-west1,STANDARD,False,,,
+acme-prod,acme-mobile-backups,us-west1,NEARLINE,True,roles/storage.objectViewer,allAuthenticatedUsers,
+acme-dev,dev-build-artifacts,us-east1,STANDARD,True,roles/storage.legacyBucketReader,allUsers,
+acme-dev,dev-database-dumps,us-central1,COLDLINE,False,,,

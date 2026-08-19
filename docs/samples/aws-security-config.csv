@@ -1,0 +1,8 @@
+account_id,bucket,region,public_access_block_enabled,default_encryption,encryption_type,versioning_enabled,hardened
+111122223333,app-assets-prod,us-east-1,True,True,AES256,True,True
+111122223333,logs-eu-central-1,eu-central-1,True,True,aws:kms (arn:aws:kms:eu-central-1:111122223333:key/5d7e0c2b-1f4a-4c8e-9b3a-7f2d1a4e9c01),True,True
+111122223333,terraform-state,us-east-1,True,True,AES256,True,True
+111122223333,legacy-media,us-east-1,False,False,NONE,False,False
+111122223333,backups,us-west-2,False,True,AES256,False,False
+111122223333,data-warehouse-export,eu-west-1,False,True,AES256,True,False
+111122223333,ci-artifacts,ap-south-1,True,False,NONE,True,False

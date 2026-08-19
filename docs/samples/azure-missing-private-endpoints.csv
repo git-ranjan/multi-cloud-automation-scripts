@@ -1,0 +1,6 @@
+"SubscriptionId","SubscriptionName","ResourceGroupName","StorageAccountName","Location","SKU","PublicNetworkAccess","AllowBlobPublicAccess","MinTlsVersion","RequireSecureTransfer","PrivateEndpointCount"
+"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","Production","rg-platform-prod","prodmedia","East US","Standard_LRS","Enabled","False","TLS1_2","True","0"
+"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","Production","rg-platform-prod","prodlogs","East US","Standard_LRS","Enabled","True","TLS1_2","True","0"
+"bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb","Legacy","rg-legacy","legacyshares","West Europe","Standard_LRS","Enabled","True","TLS1_0","False","0"
+"cccccccc-cccc-4ccc-8ccc-cccccccccccc","Staging","rg-stage","stageuploads","East US 2","Standard_LRS","Enabled","False","TLS1_2","True","0"
+"dddddddd-dddd-4ddd-8ddd-dddddddddddd","Development","rg-dev","devscratch","Central US","Standard_LRS","Disabled","False","TLS1_2","True","0"
