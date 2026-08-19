@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# Script:    audit-public-buckets.sh
-# Purpose:   Audit Cloud Storage buckets for public IAM bindings (allUsers /
-#            allAuthenticatedUsers) using gsutil.
-# Requires:  Google Cloud SDK (gsutil) and jq. Read-only.
-# Usage:     ./audit-public-buckets.sh [table|json] [output-file]
-#            Env: GCP_PROJECT (optional; defaults to gcloud configured project)
-# ==============================================================================
+# Flags Cloud Storage buckets whose IAM policy grants access to allUsers or
+# allAuthenticatedUsers (publicly readable/writable). Read-only.
+# Usage: ./audit-public-buckets.sh [table|json] [output-file]
+# Env:   GCP_PROJECT (optional; defaults to the gcloud configured project)
 
 set -euo pipefail
 
@@ -14,11 +10,8 @@ OUTPUT_FORMAT="${1:-table}"
 OUTPUT_FILE="${2:-}"
 PROJECT="${GCP_PROJECT:-}"
 
-echo "======================================================================"
-echo " Auditing Cloud Storage buckets for public IAM exposure (gsutil)"
-echo "======================================================================"
+echo "Auditing Cloud Storage buckets for public IAM exposure (gsutil)"
 
-# --- Pre-flight checks -------------------------------------------------------
 for tool in gsutil jq; do
     if ! command -v "$tool" >/dev/null 2>&1; then
         echo "Error: required tool '$tool' is not installed." >&2
@@ -36,7 +29,6 @@ if [[ -n "$PROJECT" ]]; then
     PROJECT_ARGS=(-p "$PROJECT")
 fi
 
-# --- Audit --------------------------------------------------------------------
 JSON_ROWS="[]"
 PUBLIC_COUNT=0
 TOTAL=0

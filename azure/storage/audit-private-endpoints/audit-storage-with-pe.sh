@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# Script:    audit-storage-with-pe.sh
-# Purpose:   Audit Azure Storage Accounts configured with Private Endpoints
-#            using Azure Resource Graph.
-# Requires:  Azure CLI (az) + resource-graph extension. Read-only.
-# Usage:     ./audit-storage-with-pe.sh [table|json|tsv] [output-file]
-#            Env: SUBSCRIPTION_ID (restrict to a single subscription),
-#                 PAGE_SIZE (rows per page, default 1000)
-# ==============================================================================
+# Audits storage accounts that have at least one Private Endpoint connection,
+# via Azure Resource Graph. Read-only; needs the resource-graph extension.
+# Usage: ./audit-storage-with-pe.sh [table|json|tsv] [output-file]
+# Env:   SUBSCRIPTION_ID (limit to one subscription), PAGE_SIZE (default 1000)
 
 set -euo pipefail
 
@@ -15,11 +10,9 @@ OUTPUT_FORMAT="${1:-table}"
 OUTPUT_FILE="${2:-}"
 PAGE_SIZE="${PAGE_SIZE:-1000}"
 
-echo "======================================================================"
-echo " Auditing Azure Storage Accounts with Private Endpoints (Azure CLI)"
-echo "======================================================================"
+echo "Auditing Azure Storage Accounts with Private Endpoints (Azure CLI)"
 
-# --- Pre-flight checks -------------------------------------------------------
+# Bail out early if az is missing or the user isn't logged in.
 if ! command -v az >/dev/null 2>&1; then
     echo "Error: Azure CLI (az) is not installed." >&2
     exit 1
@@ -30,7 +23,6 @@ if ! az account show >/dev/null 2>&1; then
     exit 1
 fi
 
-# --- Query --------------------------------------------------------------------
 KQL_QUERY="
 resources
 | where type =~ 'microsoft.storage/storageaccounts'
@@ -46,7 +38,6 @@ if [[ -n "${SUBSCRIPTION_ID:-}" ]]; then
     SCOPE_ARGS=(--subscriptions "$SUBSCRIPTION_ID")
 fi
 
-# --- Execute ------------------------------------------------------------------
 if [[ -n "$OUTPUT_FILE" ]]; then
     # Paginated export (complete data without truncation). Uses tsv so rows are
     # stable and mergeable regardless of the chosen display format.

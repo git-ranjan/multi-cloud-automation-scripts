@@ -51,10 +51,6 @@ def _make_s3(regional_client):
     return s3
 
 
-# --------------------------------------------------------------------------- #
-# audit_public_buckets
-# --------------------------------------------------------------------------- #
-
 class TestPublicBuckets:
     def test_bucket_with_missing_public_access_block_is_flagged(self):
         regional = mock.MagicMock()
@@ -122,10 +118,6 @@ class TestPublicBuckets:
 
         assert row["is_public"] is False
 
-
-# --------------------------------------------------------------------------- #
-# audit_bucket_security
-# --------------------------------------------------------------------------- #
 
 class TestSecurityConfig:
     def test_fully_hardened_bucket(self):

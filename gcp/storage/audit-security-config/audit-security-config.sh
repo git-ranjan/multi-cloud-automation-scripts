@@ -1,23 +1,16 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# Script:    audit-security-config.sh
-# Purpose:   Audit Cloud Storage bucket security configuration (uniform bucket
-#            level access, public access prevention, public IAM bindings).
-# Requires:  Google Cloud SDK (gcloud, gsutil) and jq. Read-only.
-# Usage:     ./audit-security-config.sh [table|json] [output-file]
-#            Env: GCP_PROJECT (optional; defaults to gcloud configured project)
-# ==============================================================================
+# Checks Cloud Storage buckets against a minimal hardening baseline: uniform
+# bucket level access, public access prevention, and public IAM bindings.
+# Read-only. Usage: ./audit-security-config.sh [table|json] [output-file]
+# Env:   GCP_PROJECT (optional; defaults to the gcloud configured project)
 
 set -euo pipefail
 
 OUTPUT_FORMAT="${1:-table}"
 OUTPUT_FILE="${2:-}"
 
-echo "======================================================================"
-echo " Auditing Cloud Storage bucket security configuration (gcloud/gsutil)"
-echo "======================================================================"
+echo "Auditing Cloud Storage bucket security configuration (gcloud/gsutil)"
 
-# --- Pre-flight checks -------------------------------------------------------
 for tool in gcloud gsutil jq; do
     if ! command -v "$tool" >/dev/null 2>&1; then
         echo "Error: required tool '$tool' is not installed." >&2
@@ -39,7 +32,6 @@ if [[ -n "$PROJECT" ]]; then
     GSUTIL_ARGS=(-p "$PROJECT")
 fi
 
-# --- Audit --------------------------------------------------------------------
 JSON_ROWS="[]"
 HARDENED_COUNT=0
 TOTAL=0

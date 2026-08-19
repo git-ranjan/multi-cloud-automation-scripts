@@ -50,10 +50,6 @@ class _FakeBucket:
         return self._policy
 
 
-# --------------------------------------------------------------------------- #
-# audit_public_buckets
-# --------------------------------------------------------------------------- #
-
 class TestPublicBuckets:
     def test_bucket_with_allusers_binding_is_flagged(self):
         bucket = _FakeBucket(
@@ -100,10 +96,6 @@ class TestPublicBuckets:
         assert row["public"] is None
         assert "403" in row["error"]
 
-
-# --------------------------------------------------------------------------- #
-# audit_bucket_security
-# --------------------------------------------------------------------------- #
 
 class TestSecurityConfig:
     def test_fully_hardened_bucket(self):

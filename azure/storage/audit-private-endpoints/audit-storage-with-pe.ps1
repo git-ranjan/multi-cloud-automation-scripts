@@ -71,16 +71,12 @@ param (
 Set-StrictMode -Version Latest
 $InformationPreference = 'Continue'
 
-# ---------------------------------------------------------------------------
-# Pre-flight: Az module
-# ---------------------------------------------------------------------------
+# Make sure the Az modules are available before anything else.
 if (-not (Get-Module -Name Az.Accounts -ListAvailable) -or -not (Get-Module -Name Az.Storage -ListAvailable)) {
     throw "The Azure PowerShell modules (Az.Accounts, Az.Storage) are required. Install with 'Install-Module -Name Az -Scope CurrentUser -Force'."
 }
 
-# ---------------------------------------------------------------------------
-# Authentication
-# ---------------------------------------------------------------------------
+# Ensure we have an authenticated context before trying to enumerate anything.
 $context = Get-AzContext
 if (-not $context) {
     if ($NoAuthPrompt) {
@@ -90,9 +86,7 @@ if (-not $context) {
     Connect-AzAccount -Environment $Environment -ErrorAction Stop | Out-Null
 }
 
-# ---------------------------------------------------------------------------
-# Subscription selection
-# ---------------------------------------------------------------------------
+# Resolve which subscriptions we're auditing: explicit IDs or all accessible ones.
 $allSubscriptions = Get-AzSubscription -ErrorAction Stop
 
 if ($SubscriptionId) {
@@ -111,9 +105,7 @@ if ($SubscriptionId) {
     $subscriptions = $allSubscriptions
 }
 
-# ---------------------------------------------------------------------------
-# Output path resolution
-# ---------------------------------------------------------------------------
+# Build a default output file name when the caller didn't pass one.
 if (-not $PSBoundParameters.ContainsKey('OutputPath')) {
     $extension = if ($ExportFormat -eq 'JSON') { 'json' } else { 'csv' }
     $OutputPath = "StorageAccountsWithPrivateEndpoints_$(Get-Date -Format 'yyyyMMdd_HHmmss').$extension"
@@ -123,9 +115,7 @@ if ($outputDirectory -and -not (Test-Path -LiteralPath $outputDirectory)) {
     $null = New-Item -ItemType Directory -Path $outputDirectory -Force
 }
 
-# ---------------------------------------------------------------------------
-# Audit
-# ---------------------------------------------------------------------------
+# Walk each subscription and collect accounts that have private endpoints.
 $report = [System.Collections.Generic.List[PSCustomObject]]::new()
 
 foreach ($sub in $subscriptions) {
@@ -159,9 +149,7 @@ foreach ($sub in $subscriptions) {
     }
 }
 
-# ---------------------------------------------------------------------------
-# Export
-# ---------------------------------------------------------------------------
+# Export the findings, or report an empty result.
 if ($report.Count -eq 0) {
     Write-Information "No storage accounts with Private Endpoints were found."
     return

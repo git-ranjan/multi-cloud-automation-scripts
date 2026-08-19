@@ -11,11 +11,12 @@
 [![KQL](https://img.shields.io/badge/Language-KQL-0078D4.svg)](https://learn.microsoft.com/en-us/azure/data-explorer/kusto/query/)
 [![Sponsor](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa.svg)](https://github.com/sponsors/git-ranjan)
 
-An enterprise-grade collection of multi-cloud operational, security governance,
-and compliance automation scripts. Designed for Cloud Engineers, DevOps Teams,
-and Security Auditors to maintain robust security posture, automate
-infrastructure discovery, and enforce enterprise governance across
-**Microsoft Azure**, **Amazon Web Services**, and **Google Cloud**.
+A collection of operational and security automation scripts for **Microsoft Azure**,
+**Amazon Web Services**, and **Google Cloud**. Mostly read-only audit utilities:
+they discover storage and networking exposure, flag misconfiguration, and export
+findings to CSV/JSON so teams can act on them. Geared toward Cloud Engineers,
+DevOps teams, and Security Auditors who want a second pair of eyes on storage
+configurations without writing bespoke tooling.
 
 ---
 

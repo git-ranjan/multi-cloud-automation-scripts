@@ -1,23 +1,15 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# Script:    audit-security-config.sh
-# Purpose:   Audit S3 bucket security configuration (Public Access Block,
-#            default encryption, versioning) using the AWS CLI.
-# Requires:  AWS CLI (aws) and jq. Read-only.
-# Usage:     ./audit-security-config.sh [table|json] [output-file]
-#            Env: AWS_PROFILE, AWS_REGION (AWS CLI standard)
-# ==============================================================================
+# Checks S3 buckets against a minimal hardening baseline: Public Access Block,
+# default encryption, and versioning. Read-only; the AWS CLI standard
+# credential chain is used. Usage: ./audit-security-config.sh [table|json] [output-file]
 
 set -euo pipefail
 
 OUTPUT_FORMAT="${1:-table}"
 OUTPUT_FILE="${2:-}"
 
-echo "======================================================================"
-echo " Auditing S3 bucket security configuration (AWS CLI)"
-echo "======================================================================"
+echo "Auditing S3 bucket security configuration (AWS CLI)"
 
-# --- Pre-flight checks -------------------------------------------------------
 for tool in aws jq; do
     if ! command -v "$tool" >/dev/null 2>&1; then
         echo "Error: required tool '$tool' is not installed." >&2
@@ -33,7 +25,9 @@ fi
 ACCOUNT="$(aws sts get-caller-identity --query Account --output text)"
 BUCKETS="$(aws s3api list-buckets --query 'Buckets[].Name' --output text)"
 
-# --- Per-bucket evaluation helpers -------------------------------------------
+# Helpers return "false" when a control is missing so the bucket shows up as
+# needing review rather than being silently skipped.
+
 public_block_enabled() {
     local bucket="$1"
     if output="$(aws s3api get-public-access-block --bucket "$bucket" \
@@ -66,7 +60,6 @@ versioning_enabled() {
     fi
 }
 
-# --- Audit --------------------------------------------------------------------
 JSON_ROWS="[]"
 HARDENED_COUNT=0
 TOTAL=0

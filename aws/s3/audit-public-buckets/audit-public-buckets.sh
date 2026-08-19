@@ -1,22 +1,16 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# Script:    audit-public-buckets.sh
-# Purpose:   Audit S3 buckets for public accessibility using the AWS CLI.
-# Requires:  AWS CLI (aws) and jq. Read-only.
-# Usage:     ./audit-public-buckets.sh [table|json] [output-file]
-#            Env: AWS_PROFILE, AWS_REGION (AWS CLI standard)
-# ==============================================================================
+# Checks every S3 bucket for the three ways it can become publicly reachable:
+# Public Access Block, bucket policy, and ACL grants to AllUsers/AuthenticatedUsers.
+# Read-only. Usage: ./audit-public-buckets.sh [table|json] [output-file]
+# Credentials come from the AWS CLI standard chain (env or AWS_PROFILE).
 
 set -euo pipefail
 
 OUTPUT_FORMAT="${1:-table}"
 OUTPUT_FILE="${2:-}"
 
-echo "======================================================================"
-echo " Auditing S3 buckets for public accessibility (AWS CLI)"
-echo "======================================================================"
+echo "Auditing S3 buckets for public accessibility (AWS CLI)"
 
-# --- Pre-flight checks -------------------------------------------------------
 for tool in aws jq; do
     if ! command -v "$tool" >/dev/null 2>&1; then
         echo "Error: required tool '$tool' is not installed." >&2
@@ -32,7 +26,6 @@ fi
 ACCOUNT="$(aws sts get-caller-identity --query Account --output text)"
 BUCKETS="$(aws s3api list-buckets --query 'Buckets[].Name' --output text)"
 
-# --- Per-bucket evaluation helpers -------------------------------------------
 # Each helper returns "true"/"false". Missing configuration is reported as
 # false (i.e. an exposure) so legacy buckets are never silently skipped.
 
@@ -68,7 +61,7 @@ acl_public() {
     fi
 }
 
-# --- Audit --------------------------------------------------------------------
+# Run the checks per bucket and emit either a JSON array or a table.
 JSON_ROWS="[]"
 PUBLIC_COUNT=0
 TOTAL=0
