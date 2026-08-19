@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -118,6 +118,8 @@ jobs:
   python-test:
     name: Test Python
     runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -128,10 +130,17 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r aws/requirements.txt -r gcp/requirements.txt pytest
+          pip install -r aws/requirements.txt -r gcp/requirements.txt pytest pytest-cov
 
-      - name: Run pytest
-        run: pytest -v
+      - name: Run pytest with coverage
+        run: pytest --cov --cov-report=term-missing --cov-report=xml
+
+      - name: Upload coverage to Codecov
+        if: env.CODECOV_TOKEN != ''
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
 
   # ------------------------------------------------------------------------- #
   # Repository-level invariants

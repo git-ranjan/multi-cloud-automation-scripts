@@ -47,7 +47,7 @@ test-powershell:
 	$(PWSH) -NoProfile -Command "Invoke-Pester -Path ./tests -Output Detailed"
 
 test-python:
-	$(PYTHON) -m pytest -v
+	$(PYTHON) -m pytest --cov --cov-report=term-missing
 
 structure:
 	@for provider in aws azure gcp; do \
